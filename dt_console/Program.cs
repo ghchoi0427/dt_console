@@ -28,7 +28,7 @@ namespace dt_console
 
             while (p.url == "")
             {
-                Console.Write("Server:");     //http://180.68.115.107:8080/
+                Console.Write("Server:");     //
 
                 p.url = Console.ReadLine();
             }
@@ -200,7 +200,7 @@ namespace dt_console
         public void show(String date)
         {
 
-            String line = url + "/schedule/show?name=" + name + "&date=" + date;               //http://localhost:8080/post?userName="jinhwan"&localDate="20210123"
+            String line = url + "/schedule/show?name=" + name + "&date=" + date;               //
             string responseText = string.Empty;
        
             StringBuilder sb = new StringBuilder();
@@ -246,7 +246,7 @@ namespace dt_console
         public void show()
         {
 
-            String line = url + "/schedule/show?name=" + name;               //http://localhost:8080/post?userName="jinhwan"&localDate="20210123"
+            String line = url + "/schedule/show?name=" + name;               //
             string responseText = string.Empty;
 
             StringBuilder sb = new StringBuilder();
@@ -294,18 +294,13 @@ namespace dt_console
         public void post(String date, String data)
         {
             String line = url + "/schedule/post?name=" + name + "&date=" + date;
-            //string data = name;//"{ \"id\": \"101\", \"name\" : \"Alex\" }";       //http://localhost:8080/post?userName="jinhwan"&localDate="20210123"
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(line);
             request.Method = "POST";
             data = "content=" + data;
             request.ContentType = "application/x-www-form-urlencoded";
             request.Timeout = 30 * 1000;
-            //request.Headers.Add("Authorization", "BASIC SGVsbG8=");
 
-            // POST할 데이타를 Request Stream에 쓴다
-
-            //byte[] bytes = Encoding.ASCII.GetBytes(data);
             byte[] bytes = Encoding.UTF8.GetBytes(data);
             
             request.ContentLength = bytes.Length; // 바이트수 지정
@@ -366,13 +361,11 @@ namespace dt_console
         public void delete(String date, int index)
         {
             String line = url + "/schedule/delete?name=" + name + "&date=" + date + "&index=" + index;
-            //string data = name;//"{ \"id\": \"101\", \"name\" : \"Alex\" }";       //http://localhost:8080/post?userName="jinhwan"&localDate="20210123"
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(line);
             request.Method = "POST";
             request.ContentType = "application/x-www-form-urlencoded";
             request.Timeout = 30 * 1000;
-            //request.Headers.Add("Authorization", "BASIC SGVsbG8=");
 
             // Response 처리
             string responseText = string.Empty;
@@ -392,13 +385,11 @@ namespace dt_console
         public void delete(String date)
         {
             String line = url + "/schedule/delete-all?name=" + name + "&date=" + date;
-            //string data = name;//"{ \"id\": \"101\", \"name\" : \"Alex\" }";       //http://localhost:8080/post?userName="jinhwan"&localDate="20210123"
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(line);
             request.Method = "POST";
             request.ContentType = "application/x-www-form-urlencoded";
             request.Timeout = 30 * 1000;
-            //request.Headers.Add("Authorization", "BASIC SGVsbG8=");
 
             // Response 처리
             string responseText = string.Empty;

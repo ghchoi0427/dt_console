@@ -14,6 +14,8 @@ namespace dt_console
         String url = "";
         String name = "";
 
+        public string Url { get => url; set => url = value; }
+
         static void Main(string[] args)
         {
 
@@ -26,11 +28,11 @@ namespace dt_console
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Title = "DAILY CHECK";
 
-            while (p.url == "")
+            while (p.Url == "")
             {
                 Console.Write("Server:");     //
 
-                p.url = Console.ReadLine();
+                p.Url = Console.ReadLine();
             }
             while (p.name == "")
             {
@@ -173,34 +175,14 @@ namespace dt_console
         public void register(String userName)
         {
 
-            String line = url + "/user/register?" + "name=" + name;               
-            string responseText = string.Empty;
-
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(line);
-            request.Method = "GET";
-            request.Timeout = 30 * 1000; // 30초
-            request.Headers.Add("Authorization", "BASIC SGVsbG8="); // 헤더 추가 방법
-
-            using (HttpWebResponse resp = (HttpWebResponse)request.GetResponse())
-            {
-                HttpStatusCode status = resp.StatusCode;
-                Console.WriteLine(status);  // 정상이면 "OK"
-
-                Stream respStream = resp.GetResponseStream();
-                using (StreamReader sr = new StreamReader(respStream))
-                {
-                    responseText = sr.ReadToEnd();
-                }
-            }
-
-           Console.WriteLine(responseText);
+            
         }
 
        
         public void show(String date)
         {
 
-            String line = url + "/schedule/show?name=" + name + "&date=" + date;               //
+            String line = Url + "/schedule/show?name=" + name + "&date=" + date;               //
             string responseText = string.Empty;
        
             StringBuilder sb = new StringBuilder();
@@ -246,7 +228,7 @@ namespace dt_console
         public void show()
         {
 
-            String line = url + "/schedule/show?name=" + name;               //
+            String line = Url + "/schedule/show?name=" + name;               //
             string responseText = string.Empty;
 
             StringBuilder sb = new StringBuilder();
@@ -293,7 +275,7 @@ namespace dt_console
 
         public void post(String date, String data)
         {
-            String line = url + "/schedule/post?name=" + name + "&date=" + date;
+            String line = Url + "/schedule/post?name=" + name + "&date=" + date;
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(line);
             request.Method = "POST";
@@ -328,7 +310,7 @@ namespace dt_console
 
         public void list(String user)
         {
-            String line = url + "/user/list";
+            String line = Url + "/user/list";
             string responseText = string.Empty;
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(line);
@@ -360,7 +342,7 @@ namespace dt_console
 
         public void delete(String date, int index)
         {
-            String line = url + "/schedule/delete?name=" + name + "&date=" + date + "&index=" + index;
+            String line = Url + "/schedule/delete?name=" + name + "&date=" + date + "&index=" + index;
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(line);
             request.Method = "POST";
@@ -384,7 +366,7 @@ namespace dt_console
 
         public void delete(String date)
         {
-            String line = url + "/schedule/delete-all?name=" + name + "&date=" + date;
+            String line = Url + "/schedule/delete-all?name=" + name + "&date=" + date;
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(line);
             request.Method = "POST";
@@ -420,5 +402,76 @@ namespace dt_console
         }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+        public void Transaction(String httpMethod, String action, String user, String date, String index)   //일정등록, 일정 검색, 하루 일정 삭제, [index==-1]의 경우 단일 일정 삭제
+        {
+            String line = "";
+            String responseText = "";
+            StringBuilder sb = new StringBuilder();
+
+            switch (action)
+            {
+                case "hello":line = Url + "/" + action; break;
+                case "register": line = Url + "/user/register" + user; break;
+                case "list": line = Url + "/user/list"; break;
+                case "post": line = Url + "/schedule/" + user + date; break;
+                case "show": line = Url + "/schedule/" + user + "/" + date; break;
+                case "show-all": line = Url + "/schedule/" + user; break;
+                case "delete": line = Url + "/schedule/" + user + "/" + date + "/" + index; break;
+                case "delete-all": line = Url + "/schedule/" + user + "/" + date; break;
+            }
+
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(line);
+            request.Method = httpMethod;
+
+            if (httpMethod == "POST")
+            {
+                request.ContentType = "application/x-www-form-urlencoded";
+                request.Timeout = 30 * 1000;
+            }
+            else if (httpMethod == "GET")
+            {
+                request.Timeout = 30 * 1000; // 30초
+                request.Headers.Add("Authorization", "BASIC SGVsbG8="); // 헤더 추가 방법
+            }
+            else if (httpMethod == "DELETE")
+            {
+
+            }
+
+            using (HttpWebResponse resp = (HttpWebResponse)request.GetResponse())
+            {
+                HttpStatusCode status = resp.StatusCode;
+                //Console.WriteLine(status);  // 정상이면 "OK"
+
+                Stream respStream = resp.GetResponseStream();
+                using (StreamReader sr = new StreamReader(respStream))
+                {
+                    responseText = sr.ReadToEnd();
+                    sb.Append(responseText);
+                }
+            }
+
+            Console.WriteLine(sb.ToString());
+            
+
+
+        }
+
     }
+    
 }

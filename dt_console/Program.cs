@@ -21,7 +21,7 @@ namespace dt_console
 
 
             Program p = new Program();
-           
+
 
             String data = "";
             String date = "";
@@ -30,7 +30,7 @@ namespace dt_console
 
             while (p.Url == "")
             {
-                Console.Write("Server:");     //
+                Console.Write("Server:");     
 
                 p.Url = Console.ReadLine();
             }
@@ -44,33 +44,42 @@ namespace dt_console
 
             while (true)
             {
-                
+
                 Console.Write(p.name + ">");
                 String input = Console.ReadLine();
-                
+
                 switch (input.Split(' ')[0])
-                {        
+                {
                     case "clear": Console.Clear(); break;
                     case "show":
                         {
-                            date = input.Split(' ')[1]; if (date.Length == 8)
+                            if (input.Split(' ').Length == 3)
                             {
-                                String temp = "";
-                                temp += date[0]; temp += date[1];temp += date[2];temp += date[3];
-                                temp += ".";
-                                temp += date[4]; temp += date[5];
-                                temp += ".";
-                                temp += date[6]; temp += date[7];
+                                date = input.Split(' ')[1];
+                                if (date.Length == 8)
+                                {
+                                    String temp = "";
+                                    temp += date[0]; temp += date[1]; temp += date[2]; temp += date[3];
+                                    temp += ".";
+                                    temp += date[4]; temp += date[5];
+                                    temp += ".";
+                                    temp += date[6]; temp += date[7];
 
-                                date = temp;
+                                    date = temp;
+                                }
+                                p.Transaction("GET", "show", p.name, date, "-1");
+                                break;
                             }
-                            p.show(date); break;
+                            else if(input.Split(' ').Length == 2)
+                            {
+                                p.Transaction("GET", "show", p.name, "-1", "-1");   //date 값이 -1일 경우 show-all
+                                break;
+
+                            }
+
+                            break;            
                         }
-                    case "show-all":
-                        {
-                            p.show();
-                            break;
-                        }
+                   
                     case "post":
                         {
                             date = input.Split(' ')[1]; if (date.Length == 8)
@@ -90,18 +99,20 @@ namespace dt_console
                                 date = temp;
                             }
 
-                            while (data!="quit")
+                            while (data != "quit")
                             {
                                 data = Console.ReadLine();
                                 if (data == "quit") break;
+                               
+                                //p.Transaction("POST", "post", p.name, date, "-1");
                                 p.post(date, data);
-                                
+
                             }
                             break;
                         }
                     case "delete":
                         {
-                            if(input.Split(' ').Length == 3)
+                            if (input.Split(' ').Length == 3)
                             {
                                 date = input.Split(' ')[1]; if (date.Length == 8)
                                 {
@@ -120,9 +131,10 @@ namespace dt_console
                                     date = temp;
                                 }
                                 int index = int.Parse(input.Split(' ')[2]);
-                                p.delete(date, index);
+                                p.Transaction("DELETE", "delete", p.name, date, index.ToString());
+                                //p.delete(date, index);
                             }
-                            else if(input.Split(' ').Length == 2)
+                            else if (input.Split(' ').Length == 2)
                             {
                                 date = input.Split(' ')[1]; if (date.Length == 8)
                                 {
@@ -140,32 +152,13 @@ namespace dt_console
 
                                     date = temp;
                                 }
-                                p.delete(date);
+                                p.Transaction("DELETE", "delete", p.name, date, "-1");
+                                //p.delete(date);
                             }
-                            
-                            break;
-                        }
-                    case "delete-all":
-                        {
-                            date = input.Split(' ')[1]; if (date.Length == 8)
-                            {
-                                String temp = "";
-                                temp += date[0];
-                                temp += date[1];
-                                temp += date[2];
-                                temp += date[3];
-                                temp += ".";
-                                temp += date[4];
-                                temp += date[5];
-                                temp += ".";
-                                temp += date[6];
-                                temp += date[7];
 
-                                date = temp;
-                            }
-                            p.delete(date);
                             break;
                         }
+                   
                     case "help": p.help(); break;
                     case "quit": return;
                 }
@@ -174,19 +167,19 @@ namespace dt_console
 
         public void register(String userName)
         {
+            Transaction("POST", "register", name, "-1", "-1");
 
-            
         }
 
-       
+
         public void show(String date)
         {
 
             String line = Url + "/schedule/show?name=" + name + "&date=" + date;               //
             string responseText = string.Empty;
-       
+
             StringBuilder sb = new StringBuilder();
-           
+
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(line);
             request.Method = "GET";
             request.Timeout = 30 * 1000; // 30초
@@ -241,7 +234,7 @@ namespace dt_console
             using (HttpWebResponse resp = (HttpWebResponse)request.GetResponse())
             {
                 HttpStatusCode status = resp.StatusCode;
-               // Console.WriteLine(status);  // 정상이면 "OK"
+                // Console.WriteLine(status);  // 정상이면 "OK"
 
                 Stream respStream = resp.GetResponseStream();
                 using (StreamReader sr = new StreamReader(respStream))
@@ -271,11 +264,11 @@ namespace dt_console
             Console.WriteLine(sb.ToString());
         }
 
-       
+
 
         public void post(String date, String data)
         {
-            String line = Url + "/schedule/post?name=" + name + "&date=" + date;
+            String line = Url + "/schedule/" + name + "/" + date;
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(line);
             request.Method = "POST";
@@ -284,7 +277,7 @@ namespace dt_console
             request.Timeout = 30 * 1000;
 
             byte[] bytes = Encoding.UTF8.GetBytes(data);
-            
+
             request.ContentLength = bytes.Length; // 바이트수 지정
 
             using (Stream reqStream = request.GetRequestStream())
@@ -312,6 +305,7 @@ namespace dt_console
         {
             String line = Url + "/user/list";
             string responseText = string.Empty;
+
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(line);
             request.Method = "GET";
@@ -415,7 +409,7 @@ namespace dt_console
 
 
 
-        
+
 
         public void Transaction(String httpMethod, String action, String user, String date, String index)   //일정등록, 일정 검색, 하루 일정 삭제, [index==-1]의 경우 단일 일정 삭제
         {
@@ -425,14 +419,38 @@ namespace dt_console
 
             switch (action)
             {
-                case "hello":line = Url + "/" + action; break;
+                case "hello": line = Url + "/" + action; break;
                 case "register": line = Url + "/user/register" + user; break;
                 case "list": line = Url + "/user/list"; break;
                 case "post": line = Url + "/schedule/" + user + date; break;
-                case "show": line = Url + "/schedule/" + user + "/" + date; break;
-                case "show-all": line = Url + "/schedule/" + user; break;
-                case "delete": line = Url + "/schedule/" + user + "/" + date + "/" + index; break;
-                case "delete-all": line = Url + "/schedule/" + user + "/" + date; break;
+                case "show":
+                    {
+                        if (index == "-1")
+                        {
+                            line = Url + "/schedule/" + user;
+                        }
+                        else
+                        {
+                            line = Url + "/schedule/" + user + "/" + date;
+                        }
+
+                        break;
+                    }
+                //case "show-all": line = Url + "/schedule/" + user; break;
+                case "delete":
+                    {
+                        if(index == "-1")
+                        {
+                            line = Url + "/schedule/" + user + "/" + date + "/" + index; 
+
+                        }
+                        else
+                        {
+                            line = Url + "/schedule/" + user + "/" + date; 
+                        }
+                        break;
+                    }
+                //case "delete-all": line = Url + "/schedule/" + user + "/" + date; break;
             }
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(line);
@@ -450,28 +468,66 @@ namespace dt_console
             }
             else if (httpMethod == "DELETE")
             {
-
+                request.Timeout = 30 * 1000; // 30초
+                request.Headers.Add("Authorization", "BASIC SGVsbG8="); // 헤더 추가 방법
             }
 
-            using (HttpWebResponse resp = (HttpWebResponse)request.GetResponse())
+            try
             {
-                HttpStatusCode status = resp.StatusCode;
-                //Console.WriteLine(status);  // 정상이면 "OK"
-
-                Stream respStream = resp.GetResponseStream();
-                using (StreamReader sr = new StreamReader(respStream))
+                using (HttpWebResponse resp = (HttpWebResponse)request.GetResponse())
                 {
-                    responseText = sr.ReadToEnd();
-                    sb.Append(responseText);
+                    HttpStatusCode status = resp.StatusCode;
+                    //Console.WriteLine(status);  // 정상이면 "OK"
+
+                    Stream respStream = resp.GetResponseStream();
+                    using (StreamReader sr = new StreamReader(respStream))
+                    {
+                        responseText = sr.ReadToEnd();
+                        sb.Append(responseText);
+                    }
                 }
             }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+           
 
-            Console.WriteLine(sb.ToString());
-            
+            if (action == "show")
+            {
+                String str = responseText;
+                StringBuilder sb2 = new StringBuilder();
+                int left = 0;
+                int right = 0;
+                while (true)
+                {
+                    left = str.IndexOf("content"); if (left == -1) break;
+                    right = str.IndexOf(","); if (right == -1) break;
+                    if (right <= left)
+                    {
+                        str = str.Substring(left);
+                        left = str.IndexOf("content"); if (left == -1) break;
+                        right = str.IndexOf(","); if (right == -1) break;
+                    }
+                    String temp = str.Substring(left + 8, right - left - 8);
+                    sb2.Append(temp + "\n");
+                    str = str.Substring(right);
+
+                }
+                Console.WriteLine(sb2.ToString());
+                return;
+            }
+
+
+            else
+            {
+                Console.WriteLine(sb.ToString());
+            }
+
 
 
         }
 
     }
-    
+
 }
